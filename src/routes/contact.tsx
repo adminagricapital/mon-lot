@@ -18,7 +18,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:description", content: description },
     ],
   }),
-  component: Contact;
+  component: Contact,
 });
 
 function Contact() {
