@@ -10,33 +10,93 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as PaiementRouteImport } from './routes/paiement'
+import { Route as TerrainsRouteImport } from './routes/terrains'
+import { Route as TerrainsIndexRouteImport } from './routes/terrains.index'
+import { Route as TerrainsReferenceRouteImport } from './routes/terrains.$reference'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaiementRoute = PaiementRouteImport.update({
+  id: '/paiement',
+  path: '/paiement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerrainsRoute = TerrainsRouteImport.update({
+  id: '/terrains',
+  path: '/terrains',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerrainsIndexRoute = TerrainsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TerrainsRoute,
+} as any)
+const TerrainsReferenceRoute = TerrainsReferenceRouteImport.update({
+  id: '/$reference',
+  path: '/$reference',
+  getParentRoute: () => TerrainsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/paiement': typeof PaiementRoute
+  '/terrains': typeof TerrainsRouteWithChildren
+  '/terrains/$reference': typeof TerrainsReferenceRoute
+  '/terrains/': typeof TerrainsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/paiement': typeof PaiementRoute
+  '/terrains/$reference': typeof TerrainsReferenceRoute
+  '/terrains': typeof TerrainsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
+  '/paiement': typeof PaiementRoute
+  '/terrains': typeof TerrainsRouteWithChildren
+  '/terrains/$reference': typeof TerrainsReferenceRoute
+  '/terrains/': typeof TerrainsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/contact'
+    | '/paiement'
+    | '/terrains'
+    | '/terrains/$reference'
+    | '/terrains/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/contact' | '/paiement' | '/terrains/$reference' | '/terrains'
+  id:
+    | '__root__'
+    | '/'
+    | '/contact'
+    | '/paiement'
+    | '/terrains'
+    | '/terrains/$reference'
+    | '/terrains/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ContactRoute: typeof ContactRoute
+  PaiementRoute: typeof PaiementRoute
+  TerrainsRoute: typeof TerrainsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +108,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paiement': {
+      id: '/paiement'
+      path: '/paiement'
+      fullPath: '/paiement'
+      preLoaderRoute: typeof PaiementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terrains': {
+      id: '/terrains'
+      path: '/terrains'
+      fullPath: '/terrains'
+      preLoaderRoute: typeof TerrainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terrains/': {
+      id: '/terrains/'
+      path: '/'
+      fullPath: '/terrains/'
+      preLoaderRoute: typeof TerrainsIndexRouteImport
+      parentRoute: typeof TerrainsRoute
+    }
+    '/terrains/$reference': {
+      id: '/terrains/$reference'
+      path: '/$reference'
+      fullPath: '/terrains/$reference'
+      preLoaderRoute: typeof TerrainsReferenceRouteImport
+      parentRoute: typeof TerrainsRoute
+    }
   }
 }
 
+interface TerrainsRouteChildren {
+  TerrainsReferenceRoute: typeof TerrainsReferenceRoute
+  TerrainsIndexRoute: typeof TerrainsIndexRoute
+}
+
+const TerrainsRouteChildren: TerrainsRouteChildren = {
+  TerrainsReferenceRoute: TerrainsReferenceRoute,
+  TerrainsIndexRoute: TerrainsIndexRoute,
+}
+
+const TerrainsRouteWithChildren = TerrainsRoute._addFileChildren(
+  TerrainsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ContactRoute: ContactRoute,
+  PaiementRoute: PaiementRoute,
+  TerrainsRoute: TerrainsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
