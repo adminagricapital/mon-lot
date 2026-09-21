@@ -29,7 +29,7 @@ const lotSchema = z.object({
 
 export type AdminLotInput = z.infer<typeof lotSchema>;
 
-async function assertAdmin(supabase: { rpc: never } | any, userId: string) {
+async function assertAdmin(supabase: SupabaseClient<Database>, userId: string) {
   const { data, error } = await supabase
     .from("user_roles")
     .select("role")
