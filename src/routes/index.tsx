@@ -1,228 +1,109 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, CalendarClock, FileCheck2, MapPin, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowRight, CalendarClock, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 
-import heroImage from "@/assets/hero-terrain.jpg";
 import { LotCard } from "@/components/lot-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { lots } from "@/data/lots";
-import { allPlans, formatFcfa } from "@/lib/pricing";
+import { listFeaturedLots } from "@/lib/catalogue.functions";
+import { SITE } from "@/lib/site";
 
-const title = "Mon Lot — Achetez votre terrain en Côte d'Ivoire, cash ou échelonné";
+const title = "Mon Lot — Terrains en Côte d’Ivoire";
 const description =
-  "Terrains bornés et géolocalisés en Côte d'Ivoire. Prix cash affiché, paiement échelonné sur 3, 6, 9 ou 12 mois avec 30 % de réservation.";
+  "Trouvez votre terrain en Côte d’Ivoire et choisissez un paiement au comptant ou échelonné jusqu’à 12 mois.";
 
 export const Route = createFileRoute("/")({
+  loader: () => listFeaturedLots(),
   head: () => ({
     meta: [
       { title },
       { name: "description", content: description },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Accueil,
 });
 
 const avantages = [
-  {
-    icon: Wallet,
-    titre: "Prix cash officiel",
-    texte:
-      "Un seul prix de référence affiché sur chaque fiche. Toutes les formules en découlent automatiquement.",
-  },
-  {
-    icon: CalendarClock,
-    titre: "Paiement échelonné",
-    texte:
-      "3, 6, 9 ou 12 mois : 30 % à la réservation, le solde en échéances mensuelles claires.",
-  },
-  {
-    icon: MapPin,
-    titre: "Terrains géolocalisés",
-    texte: "Chaque lot est relevé sur le terrain : bornes, accès et environnement documentés.",
-  },
-  {
-    icon: ShieldCheck,
-    titre: "Stock maîtrisé",
-    texte: "Nous vendons notre propre stock. Un lot réservé est verrouillé : pas de double vente.",
-  },
-];
-
-const etapes = [
-  { n: "01", t: "Choisissez votre lot", d: "Filtrez par ville, superficie et budget dans le catalogue." },
-  { n: "02", t: "Comparez les formules", d: "Cash ou échelonné : le prix total et les échéances s'affichent." },
-  { n: "03", t: "Réservez en ligne", d: "Payez 30 % de réservation et recevez votre reçu automatiquement." },
-  { n: "04", t: "Suivez vos échéances", d: "Votre espace client garde vos paiements et documents à jour." },
+  { icon: ShieldCheck, titre: "Des offres vérifiées", texte: "Chaque terrain publié est contrôlé avant sa mise en vente." },
+  { icon: CalendarClock, titre: "Des paiements souples", texte: "Choisissez le comptant ou une formule sur 3, 6, 9 ou 12 mois." },
+  { icon: MapPin, titre: "Des informations claires", texte: "Consultez la superficie, l’emplacement, l’accès et les documents annoncés." },
 ];
 
 function Accueil() {
-  const exemple = allPlans(500000);
-  const vitrine = lots.filter((l) => l.statut !== "vendu").slice(0, 3);
+  const featured = Route.useLoaderData();
 
   return (
     <div className="min-h-dvh">
       <SiteHeader />
       <main>
-        {/* Hero */}
-        <section className="relative isolate overflow-hidden">
-          <img
-            src={heroImage}
-            alt="Vue aérienne d'un lotissement de terrains bornés en Côte d'Ivoire"
-            width={1600}
-            height={1104}
-            className="absolute inset-0 -z-10 size-full object-cover"
-          />
+        <section className="relative isolate min-h-[72vh] overflow-hidden bg-primary-dark text-primary-foreground">
+          {featured[0] ? (
+            <img src={featured[0].cover_image_url} alt="" className="absolute inset-0 -z-20 size-full object-cover opacity-55" />
+          ) : null}
           <div className="hero-overlay absolute inset-0 -z-10" />
-          <div className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
-            <p className="inline-flex items-center rounded-full bg-primary-foreground/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-foreground ring-1 ring-primary-foreground/25">
-              Côte d'Ivoire · Stock Mon Lot
-            </p>
-            <h1 className="mt-6 max-w-2xl font-display text-4xl font-semibold leading-tight text-primary-foreground sm:text-6xl">
-              Votre terrain, plus accessible.
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-foreground/90 sm:text-lg">
-              Découvrez des lots bornés, géolocalisés et prêts à bâtir. Payez au comptant ou étalez
-              votre achat sur 3 à 12 mois, avec des échéances connues d'avance.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link
-                to="/terrains"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-sand px-6 font-semibold text-sand-foreground transition-transform hover:-translate-y-0.5"
-              >
-                Voir les terrains disponibles
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-              <Link
-                to="/paiement"
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-primary-foreground/40 px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground/10"
-              >
-                Comprendre le paiement échelonné
-              </Link>
+          <div className="mx-auto flex min-h-[72vh] w-full max-w-6xl items-center px-4 py-20 sm:px-6">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase text-sand">Terrains en Côte d’Ivoire</p>
+              <h1 className="mt-5 text-4xl font-semibold leading-tight sm:text-6xl">Votre terrain, votre avenir.</h1>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/85 sm:text-lg">
+                Mon Lot vous accompagne pour choisir un terrain adapté à votre projet et à votre budget.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link to="/terrains" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-sand px-6 font-semibold text-sand-foreground">
+                  Découvrir les terrains <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <a href={SITE.whatsappHref} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-primary-foreground/40 px-6 font-semibold">
+                  <MessageCircle className="size-4" aria-hidden="true" /> Parler à un conseiller
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Avantages */}
         <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <h2 className="text-3xl font-semibold sm:text-4xl">Une façon plus simple d'acheter</h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Chaque lot est présenté comme un produit : référence unique, prix officiel,
-            disponibilité en temps réel et localisation vérifiée.
-          </p>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {avantages.map(({ icon: Icon, titre, texte }) => (
-              <div key={titre} className="surface-card p-6">
-                <span className="inline-flex size-11 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <h3 className="mt-4 text-lg font-semibold">{titre}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{texte}</p>
-              </div>
-            ))}
+          <div className="grid gap-8 lg:grid-cols-[1fr_1.3fr]">
+            <div>
+              <p className="text-sm font-semibold uppercase text-primary">Mon Lot</p>
+              <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Achetez avec confiance</h2>
+              <p className="mt-4 leading-relaxed text-muted-foreground">Un accompagnement humain, des informations utiles et des modalités de paiement lisibles à chaque étape.</p>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-3">
+              {avantages.map(({ icon: Icon, titre, texte }) => (
+                <article key={titre} className="border-t-2 border-primary pt-5">
+                  <Icon className="size-6 text-primary" aria-hidden="true" />
+                  <h3 className="mt-4 text-lg font-semibold">{titre}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{texte}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Terrains en vedette */}
-        <section className="bg-secondary/50 py-16 sm:py-20">
+        <section className="bg-secondary/60 py-16 sm:py-20">
           <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <h2 className="text-3xl font-semibold sm:text-4xl">Terrains à la une</h2>
-                <p className="mt-2 text-muted-foreground">
-                  Une sélection de lots actuellement commercialisés.
-                </p>
+              <div><p className="text-sm font-semibold uppercase text-primary">Sélection</p><h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Terrains à la une</h2></div>
+              <Link to="/terrains" className="inline-flex items-center gap-2 font-semibold text-primary">Voir le catalogue <ArrowRight className="size-4" /></Link>
+            </div>
+            {featured.length ? (
+              <div className="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{featured.map((lot) => <LotCard key={lot.id} lot={lot} />)}</div>
+            ) : (
+              <div className="mt-9 border-y border-border py-12 text-center">
+                <h3 className="text-xl font-semibold">De nouvelles opportunités arrivent bientôt</h3>
+                <p className="mx-auto mt-2 max-w-xl text-muted-foreground">Contactez notre équipe pour nous parler de votre recherche et être informé des prochaines offres.</p>
+                <Link to="/contact" className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground">Décrire mon projet</Link>
               </div>
-              <Link
-                to="/terrains"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
-              >
-                Tout le catalogue <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {vitrine.map((lot) => (
-                <LotCard key={lot.reference} lot={lot} />
-              ))}
-            </div>
+            )}
           </div>
         </section>
 
-        {/* Exemple tarifaire */}
         <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <h2 className="text-3xl font-semibold sm:text-4xl">Un calcul transparent</h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Exemple pour un terrain à {formatFcfa(500000)} au comptant. La réservation correspond
-            toujours à 30 % du prix de la formule choisie.
-          </p>
-          <div className="mt-8 overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-sm">
-              <thead>
-                <tr className="bg-primary text-primary-foreground">
-                  <th className="rounded-l-lg px-4 py-3 text-left font-semibold">Formule</th>
-                  <th className="px-4 py-3 text-right font-semibold">Prix total</th>
-                  <th className="px-4 py-3 text-right font-semibold">Réservation 30 %</th>
-                  <th className="px-4 py-3 text-right font-semibold">Solde</th>
-                  <th className="rounded-r-lg px-4 py-3 text-right font-semibold">Échéance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {exemple.map((p) => (
-                  <tr key={p.label} className="border-b border-border">
-                    <td className="px-4 py-3 font-semibold">{p.label}</td>
-                    <td className="px-4 py-3 text-right">{formatFcfa(p.total)}</td>
-                    <td className="px-4 py-3 text-right">
-                      {p.duration === 0 ? "—" : formatFcfa(p.reservation)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {p.duration === 0 ? "—" : formatFcfa(p.balance)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {p.duration === 0
-                        ? "Paiement unique"
-                        : `${formatFcfa(p.monthly)} × ${p.duration}`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Étapes */}
-        <section className="bg-primary-dark py-16 text-primary-foreground sm:py-20">
-          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-            <h2 className="text-3xl font-semibold sm:text-4xl">Comment ça marche</h2>
-            <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {etapes.map((e) => (
-                <li key={e.n} className="border-t border-primary-foreground/25 pt-5">
-                  <span className="font-display text-3xl font-semibold text-sand">{e.n}</span>
-                  <h3 className="mt-3 text-lg font-semibold">{e.t}</h3>
-                  <p className="mt-2 text-sm opacity-80">{e.d}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="surface-card flex flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
-            <div>
-              <h2 className="text-2xl font-semibold sm:text-3xl">
-                Prêt à sécuriser votre terrain ?
-              </h2>
-              <p className="mt-2 flex items-center gap-2 text-muted-foreground">
-                <FileCheck2 className="size-4" aria-hidden="true" />
-                Reçus, échéanciers et documents générés automatiquement.
-              </p>
-            </div>
-            <Link
-              to="/contact"
-              className="inline-flex h-12 shrink-0 items-center justify-center rounded-lg bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
-            >
-              Parler à un conseiller
-            </Link>
+          <div className="grid gap-8 bg-primary-dark p-8 text-primary-foreground sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div><h2 className="text-3xl font-semibold">Un projet de terrain ?</h2><p className="mt-3 max-w-2xl text-primary-foreground/80">Notre équipe vous aide à préciser votre budget, votre zone et votre formule de paiement.</p></div>
+            <Link to="/contact" className="inline-flex h-12 items-center justify-center rounded-lg bg-sand px-6 font-semibold text-sand-foreground">Nous contacter</Link>
           </div>
         </section>
       </main>

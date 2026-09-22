@@ -1,114 +1,51 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Mail, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
+import { createFileRoute, useServerFn } from "@tanstack/react-router";
+import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { useState, type FormEvent } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { submitContactRequest } from "@/lib/catalogue.functions";
+import { SITE } from "@/lib/site";
 
-const title = "Contacter Mon Lot — conseils et réservation de terrain";
-const description =
-  "Écrivez à l'équipe Mon Lot pour visiter un terrain, réserver un lot ou choisir votre formule de paiement en Côte d'Ivoire.";
-
+const title = "Contact — Mon Lot";
+const description = "Contactez Mon Lot à Daloa pour votre projet d’achat de terrain en Côte d’Ivoire.";
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title },
-      { name: "description", content: description },
-      { property: "og:title", content: title },
-      { property: "og:description", content: description },
-    ],
-  }),
+  head: () => ({ meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Contact,
 });
 
 function Contact() {
-  const [envoye, setEnvoye] = useState(false);
+  const submit = useServerFn(submitContactRequest);
+  const [state, setState] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [error, setError] = useState("");
   const inputClass = "h-11 w-full rounded-lg border border-input bg-card px-3 text-sm";
-
-  return (
-    <div className="min-h-dvh">
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-        <h1 className="text-3xl font-semibold sm:text-4xl">Parlons de votre projet</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          Un conseiller vous accompagne du choix du lot jusqu'à la signature.
-        </p>
-
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
-          <form
-            className="surface-card space-y-5 p-6 sm:p-8"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setEnvoye(true);
-            }}
-          >
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label htmlFor="nom" className="mb-1.5 block text-sm font-medium">
-                  Nom complet
-                </label>
-                <input id="nom" name="nom" required className={inputClass} />
-              </div>
-              <div>
-                <label htmlFor="tel" className="mb-1.5 block text-sm font-medium">
-                  Téléphone
-                </label>
-                <input id="tel" name="tel" type="tel" required className={inputClass} />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                Email
-              </label>
-              <input id="email" name="email" type="email" className={inputClass} />
-            </div>
-            <div>
-              <label htmlFor="message" className="mb-1.5 block text-sm font-medium">
-                Votre message
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={5}
-                required
-                className="w-full rounded-lg border border-input bg-card p-3 text-sm"
-                placeholder="Référence du terrain, ville souhaitée, budget…"
-              />
-            </div>
-            <button
-              type="submit"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary-dark"
-            >
-              Envoyer la demande
-            </button>
-            {envoye && (
-              <p className="text-sm font-medium text-primary" role="status">
-                Merci, votre demande est enregistrée. L'envoi réel sera activé avec l'espace
-                administrateur.
-              </p>
-            )}
-          </form>
-
-          <aside className="surface-card h-fit p-6 sm:p-8">
-            <h2 className="text-lg font-semibold">Nous joindre</h2>
-            <ul className="mt-5 space-y-4 text-sm">
-              <li className="flex items-center gap-3">
-                <Phone className="size-4 text-primary" aria-hidden="true" /> +225 00 00 00 00
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="size-4 text-primary" aria-hidden="true" /> contact@monlot.ci
-              </li>
-              <li className="flex items-center gap-3">
-                <MapPin className="size-4 text-primary" aria-hidden="true" /> Abidjan, Côte d'Ivoire
-              </li>
-            </ul>
-            <p className="mt-6 text-xs text-muted-foreground">
-              Ces coordonnées sont provisoires : donnez-nous les vraies et nous les mettons à jour.
-            </p>
-          </aside>
-        </div>
-      </main>
-      <SiteFooter />
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setState("sending"); setError("");
+    const form = new FormData(event.currentTarget);
+    try {
+      await submit({ data: { fullName: String(form.get("fullName") ?? ""), phone: String(form.get("phone") ?? ""), email: String(form.get("email") ?? ""), subject: String(form.get("subject") ?? ""), message: String(form.get("message") ?? "") } });
+      event.currentTarget.reset(); setState("success");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Votre message n’a pas pu être envoyé."); setState("error"); }
+  }
+  return <div className="min-h-dvh"><SiteHeader /><main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+    <p className="text-sm font-semibold uppercase text-primary">Nous sommes à votre écoute</p><h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Parlons de votre projet</h1><p className="mt-3 max-w-2xl text-muted-foreground">Dites-nous ce que vous recherchez. Un conseiller Mon Lot vous recontactera.</p>
+    <div className="mt-10 grid gap-10 lg:grid-cols-[1.35fr_1fr]">
+      <form onSubmit={handleSubmit} className="space-y-5 border-t-2 border-primary pt-6">
+        <div className="grid gap-5 sm:grid-cols-2"><label className="text-sm font-medium">Nom complet<input name="fullName" required minLength={2} className={`${inputClass} mt-1.5`} /></label><label className="text-sm font-medium">Téléphone<input name="phone" type="tel" required minLength={8} className={`${inputClass} mt-1.5`} /></label></div>
+        <label className="block text-sm font-medium">Email (facultatif)<input name="email" type="email" className={`${inputClass} mt-1.5`} /></label>
+        <label className="block text-sm font-medium">Objet<input name="subject" required minLength={2} className={`${inputClass} mt-1.5`} placeholder="Recherche de terrain, visite…" /></label>
+        <label className="block text-sm font-medium">Votre message<textarea name="message" rows={6} required minLength={5} className="mt-1.5 w-full rounded-lg border border-input bg-card p-3 text-sm" /></label>
+        <Button type="submit" size="lg" disabled={state === "sending"}>{state === "sending" ? "Envoi en cours…" : "Envoyer ma demande"}</Button>
+        {state === "success" ? <p role="status" className="font-medium text-primary">Merci. Votre demande a bien été transmise à notre équipe.</p> : null}
+        {state === "error" ? <p role="alert" className="font-medium text-destructive">{error}</p> : null}
+      </form>
+      <aside className="bg-secondary p-7"><h2 className="text-xl font-semibold">Nous joindre directement</h2><ul className="mt-6 space-y-5 text-sm">
+        <li><a href={SITE.phoneHref} className="flex items-center gap-3"><Phone className="size-5 text-primary" /> {SITE.phoneDisplay}</a></li>
+        <li><a href={SITE.whatsappHref} target="_blank" rel="noreferrer" className="flex items-center gap-3"><MessageCircle className="size-5 text-primary" /> WhatsApp</a></li>
+        <li><a href={SITE.emailHref} className="flex items-center gap-3"><Mail className="size-5 text-primary" /> {SITE.email}</a></li>
+        <li className="flex items-center gap-3"><MapPin className="size-5 text-primary" /> {SITE.address}</li>
+      </ul></aside>
     </div>
-  );
+  </main><SiteFooter /></div>;
 }
