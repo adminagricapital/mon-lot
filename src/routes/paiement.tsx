@@ -7,7 +7,7 @@ import { allPlans, formatFcfa } from "@/lib/pricing";
 
 const title = "Paiement cash ou échelonné sur 3 à 12 mois — Mon Lot";
 const description =
-  "Comprenez la grille tarifaire Mon Lot : majoration selon la durée, 30 % de réservation, solde réparti en échéances mensuelles. Simulateur inclus.";
+  "Comparez simplement les formules Mon Lot au comptant ou sur 3, 6, 9 et 12 mois.";
 
 export const Route = createFileRoute("/paiement")({
   head: () => ({
@@ -21,13 +21,7 @@ export const Route = createFileRoute("/paiement")({
   component: Paiement,
 });
 
-const regles = [
-  "L'administration saisit uniquement le prix cash officiel du terrain.",
-  "Le prix de chaque formule est calculé automatiquement : +20 % (3 mois), +50 % (6 mois), +80 % (9 mois), +100 % (12 mois).",
-  "La réservation représente 30 % du prix de la formule choisie.",
-  "Le solde (70 %) est réparti en échéances mensuelles ; la dernière est ajustée à l'arrondi.",
-  "Un lot réservé est verrouillé et n'est plus proposé à l'achat.",
-];
+const regles = ["Choisissez la durée qui correspond le mieux à votre budget.", "Pour une formule échelonnée, un premier versement de 30 % confirme votre demande.", "Le solde est réparti en mensualités régulières sur la durée choisie.", "Chaque montant est récapitulé clairement avant l’envoi de votre demande."];
 
 function Paiement() {
   const [prix, setPrix] = useState(500000);
@@ -66,7 +60,7 @@ function Paiement() {
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-lg font-semibold">{p.label}</h3>
                   <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
-                    {p.duration === 0 ? "Prix de base" : `+${(p.total / (prix || 1) - 1) * 100}%`}
+                    {p.duration === 12 ? "Formule confort" : `Économisez ${p.savingsVs12} %`}
                   </span>
                 </div>
                 <p className="mt-3 font-display text-2xl font-semibold text-primary">
@@ -102,7 +96,7 @@ function Paiement() {
         </section>
 
         <section className="mt-12">
-          <h2 className="text-2xl font-semibold">Les règles appliquées</h2>
+          <h2 className="text-2xl font-semibold">Votre paiement, en toute simplicité</h2>
           <ul className="mt-5 space-y-3">
             {regles.map((r) => (
               <li key={r} className="surface-card p-4 text-sm leading-relaxed">

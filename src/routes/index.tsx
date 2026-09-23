@@ -6,6 +6,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { listFeaturedLots } from "@/lib/catalogue.functions";
 import { SITE } from "@/lib/site";
+import heroTerrain from "@/assets/hero-terrain.jpg";
+import { DEMO_LOTS } from "@/data/demo-lots";
 
 const title = "Mon Lot — Terrains en Côte d’Ivoire";
 const description =
@@ -34,15 +36,14 @@ const avantages = [
 
 function Accueil() {
   const featured = Route.useLoaderData();
+  const displayed = featured.length ? featured : DEMO_LOTS;
 
   return (
     <div className="min-h-dvh">
       <SiteHeader />
       <main>
         <section className="relative isolate min-h-[72vh] overflow-hidden bg-primary-dark text-primary-foreground">
-          {featured[0] ? (
-            <img src={featured[0].cover_image_url} alt="" className="absolute inset-0 -z-20 size-full object-cover opacity-55" />
-          ) : null}
+          <img src={featured[0]?.cover_image_url ?? heroTerrain} alt="" className="absolute inset-0 -z-20 size-full object-cover opacity-65" />
           <div className="hero-overlay absolute inset-0 -z-10" />
           <div className="mx-auto flex min-h-[72vh] w-full max-w-6xl items-center px-4 py-20 sm:px-6">
             <div className="max-w-3xl">
@@ -88,15 +89,8 @@ function Accueil() {
               <div><p className="text-sm font-semibold uppercase text-primary">Sélection</p><h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Terrains à la une</h2></div>
               <Link to="/terrains" className="inline-flex items-center gap-2 font-semibold text-primary">Voir le catalogue <ArrowRight className="size-4" /></Link>
             </div>
-            {featured.length ? (
-              <div className="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{featured.map((lot) => <LotCard key={lot.id} lot={lot} />)}</div>
-            ) : (
-              <div className="mt-9 border-y border-border py-12 text-center">
-                <h3 className="text-xl font-semibold">De nouvelles opportunités arrivent bientôt</h3>
-                <p className="mx-auto mt-2 max-w-xl text-muted-foreground">Contactez notre équipe pour nous parler de votre recherche et être informé des prochaines offres.</p>
-                <Link to="/contact" className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground">Décrire mon projet</Link>
-              </div>
-            )}
+            {!featured.length ? <p className="mt-6 text-sm text-muted-foreground">Aperçu de présentation — les offres réelles seront indiquées dès leur publication.</p> : null}
+            <div className="mt-9 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{displayed.slice(0, 3).map((lot) => <LotCard key={lot.id} lot={lot} demo={!featured.length} />)}</div>
           </div>
         </section>
 
